@@ -46,7 +46,7 @@ public class CharacterManager : MonoBehaviour
 
             movementManager.ConstrainRotation(true, true, true);
 
-            rb.useGravity = true;
+            rb.useGravity = true;           
 
         }
 

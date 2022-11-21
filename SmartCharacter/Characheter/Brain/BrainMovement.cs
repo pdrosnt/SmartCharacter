@@ -8,7 +8,6 @@ using System;
 public class BrainMovement
 {
     public Brain brain;
-
     public float horizontalSpeed = 2;
     public float maxGravity = -9.8f;
     public float minGravity = -0.5f;
@@ -16,13 +15,12 @@ public class BrainMovement
     public float tempGravit = 0;
     public float inAirTime = 0.0f;
 
-    public float positiveSlopeMultiplier = 1f;
-    public float negativeSlopeMultiplier = 1f;
-
-    public float edgeImpuse = 1f;
-    public float maxNegativeSlope = -0.5f;
-
-
+    public float slopeMultiplier = 1f;
+    public float slope;
+    public float jumpForce = 2f;
+    public bool jumping = false;
+    public float jumpingTime = 0f;
+    public float maxJumpingTime = .5f;
 
     public Vector3 GetProjectedOnPlaneVelocity(Vector2 direction)
     {
@@ -36,49 +34,69 @@ public class BrainMovement
         {
             if (direction.magnitude > 0)
             {
-                if (brain.sensoresManager.BackFowardDistancesDifference > 0)
-                {
+                slope = brain.sensoresManager.height / brain.sensoresManager.groundRayHorizontalOffset * -1f;
 
-                    velocity.y = (brain.sensoresManager.BackFowardDistancesDifference) * positiveSlopeMultiplier;
+                velocity.y = slope;
 
-                }
-                else
-                {
-
-                    velocity.y = (brain.sensoresManager.BackFowardDistancesDifference) * negativeSlopeMultiplier;
-
+                //step boost
+                bool step = brain.sensoresManager.groundBackward.normal.y > slope ? true : false;
+                if(brain.sensoresManager.groundBackward.normal.y < 0.9f ||  slope < 0.9f){step = false;}
+                if(step){
+                    velocity.y += brain.sensoresManager.height * -1f;
                 }
             }
         }
 
-        return velocity.normalized;
+        return velocity;
     }
 
 
     public Vector3 GetVelocity()
-    {
+    {   
         UpdateInAirVariables();
 
-        Vector3 velocity = GetProjectedOnPlaneVelocity(brain.inputHandler.directions);
+        Vector3 velocity = Vector3.zero;
+        
+        velocity.x = brain.inputHandler.directions.x;
+        velocity.z = brain.inputHandler.directions.y;
 
+        tempGravit = 0;
+        
+        if(jumping)
+        {
+            jumpingTime += Time.deltaTime;
+            tempGravit = Mathf.Lerp(jumpForce,minGravity,jumpingTime / maxJumpingTime);
+
+            if(jumpingTime > maxJumpingTime){jumping = false;}
+
+
+        }else
         if (brain.sensoresManager.isGrounded)
         {
 
-            tempGravit = (velocity.y);
+            velocity = GetProjectedOnPlaneVelocity(brain.inputHandler.directions);
+
+            velocity.Normalize();
+
+            velocity.y *= horizontalSpeed;
+
+            if(jumping == false){jumping = brain.inputHandler.space.pressed;}
+
+            jumpingTime = 0;
+            tempGravit = 0;
 
         }
         else
         {
-            tempGravit = -Mathf.Abs(inAirTime * gravityAcelleration);
+            if(jumping) inAirTime = 0;
+           
+            tempGravit += Mathf.Lerp(minGravity,maxGravity,inAirTime / gravityAcelleration);
 
-            if (tempGravit > maxGravity)
-            {
-                tempGravit = maxGravity;
-            }
+            if(tempGravit > maxGravity)tempGravit = maxGravity;
+
         }
 
-        velocity.y = tempGravit + minGravity;
-        velocity.y *= horizontalSpeed;
+        velocity.y += tempGravit;
         velocity.x *= horizontalSpeed;
         velocity.z *= horizontalSpeed;
 
@@ -96,7 +114,6 @@ public class BrainMovement
         {
             inAirTime = 0;
         }
-
     }
 
     

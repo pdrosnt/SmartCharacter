@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using UnityEngine.Events;
 using UnityEngine;
 using System;
 
@@ -7,18 +6,17 @@ using System;
 [Serializable]
 public class Brain : MonoBehaviour
 {
-    
     public CharacterManager characterManager;
     public BrainSensores sensoresManager;
     public InputHandler inputHandler;
     public BrainMovement movementManager;
-    public Transform target;
+    public BrainBehaviour behaviours;
+    protected Transform target;
+
     protected void Awake() {
         
-        Debug.Log("awake 1");
-
         if(inputHandler == null){
-            inputHandler = new InputHandler();
+        inputHandler = new InputHandler();
         }
         
         characterManager = GetComponent<CharacterManager>();
@@ -33,25 +31,27 @@ public class Brain : MonoBehaviour
         ColisionSensor colisionSensor = GetComponent<ColisionSensor>();
         if(colisionSensor != null){sensoresManager.colisionSensor = colisionSensor;}
 
-
         if(movementManager == null){movementManager = new BrainMovement();}
-        movementManager.brain = this;
+        movementManager.brain = this;        
+    }
 
+    private void Start()
+    {
+        
     }
 
     private void Update() {
 
         sensoresManager.UpdateSensors();
 
-        React();
+        var b = behaviours.GetAiBehaviour(transform);
+
+        foreach (var x in b){
+        
+            characterManager.characterEngine.StackBehaviour(x);
+
+        }
 
     }
-
-    public void React()
-    {
-
-
-    }
-
 
 }

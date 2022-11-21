@@ -1,11 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BehaviourFabric
+public static class BehaviourFabric
 {
-
-    public CharacterBehaviour CreateBehaviour(Transform target,Vector3 velocity, float maxTime, float minTime){
+    public static CharacterBehaviour CreateBehaviour(Transform target,Vector3 velocity, float maxTime, float minTime){
      
         CharacterBehaviour behaviour = new CharacterBehaviour();
 
@@ -19,9 +17,5 @@ public class BehaviourFabric
 
         return behaviour;
     }
-
-
-
-
 
 }

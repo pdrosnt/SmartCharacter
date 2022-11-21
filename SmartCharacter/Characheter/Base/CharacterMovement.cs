@@ -32,7 +32,7 @@ public class CharacterMovement
         Vector3 right = Vector3.Cross(backward,up);
 
         backward.y = 0;
-
+        
         right.y = 0;
 
         rigidbody.velocity = Vector3.zero;
@@ -55,7 +55,7 @@ public class CharacterMovement
 
         rigidbody.transform.LookAt(target);
 
-        Vector3 eulerRotation = rigidbody. transform.rotation.eulerAngles;
+        Vector3 eulerRotation = rigidbody.transform.rotation.eulerAngles;
        
         if(!rotateX){
         eulerRotation.x = 0;
@@ -91,9 +91,6 @@ public class CharacterMovement
         {
             rigidbody.constraints = RigidbodyConstraints.FreezeRotationZ;
         }
-
-        rigidbody.useGravity = false;
-
     }
   
 }

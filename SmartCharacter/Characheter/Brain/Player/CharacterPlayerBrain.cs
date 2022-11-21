@@ -4,16 +4,30 @@ using UnityEngine;
 
 public class CharacterPlayerBrain : Brain
 {
-    BehaviourFabric behaviourFabric = new BehaviourFabric();
-
     public Transform camTransform;
 
     public bool rotationLockedWithCamera = false;
 
-
     protected new void Awake()
     {
-        base.Awake();
+        if(inputHandler == null){
+        inputHandler = new InputHandler();
+        }
+        
+        characterManager = GetComponent<CharacterManager>();
+
+        if(sensoresManager == null){
+        sensoresManager = new BrainSensores();}
+        sensoresManager.brain = this;
+        sensoresManager.characterTransform = transform;
+
+        sensoresManager.AdjustRaycastHorizontalOffset(characterManager.GetComponent<Collider>());
+
+        ColisionSensor colisionSensor = GetComponent<ColisionSensor>();
+        if(colisionSensor != null){sensoresManager.colisionSensor = colisionSensor;}
+
+        if(movementManager == null){movementManager = new BrainMovement();}
+        movementManager.brain = this;
 
         Debug.Log("awake 2");
 
@@ -44,13 +58,12 @@ public class CharacterPlayerBrain : Brain
 
         Vector3 velocity = movementManager.GetVelocity();
 
-        characterManager.characterEngine.OvewriteBehaviour(behaviourFabric.CreateBehaviour(target.transform, velocity,0, 0));
+        characterManager.characterEngine.OvewriteBehaviour(BehaviourFabric.CreateBehaviour(target.transform, velocity,0, 0));
 
     }
 
     public void UpdateMoveInputsRelativeToCamera()
     {
-
         Vector3 camFoward = camTransform.forward;
 
         Vector3 camRight = camTransform.right;
@@ -65,11 +78,9 @@ public class CharacterPlayerBrain : Brain
 
         if (rotationLockedWithCamera)
         {
-
             targetDirection = camFoward;
 
             target.transform.position = transform.position + targetDirection;
-
         }
         else
         {
@@ -114,6 +125,4 @@ public class CharacterPlayerBrain : Brain
         inputHandler.directions.x = direction.x;
         inputHandler.directions.y = direction.z;
     }
-
-
 }
